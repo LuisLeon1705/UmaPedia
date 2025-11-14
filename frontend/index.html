@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Uma Musume Auth</title>
+
+    <!-- PrimeFlex utilidades y PrimeIcons -->
+    <link rel="stylesheet" href="./node_modules/primeflex/primeflex.css" />
+    <link rel="stylesheet" href="./node_modules/primeicons/primeicons.css" />
+
+    <style>
+      :root {
+        --uma-primary: #6c5ce7;
+        --uma-primary-light: #a29bff;
+        --uma-accent: #fd79a8;
+        --uma-bg: #050816;
+        --uma-bg-soft: rgba(18, 24, 38, 0.95);
+        --uma-success: #00e676;
+        --uma-error: #ff5252;
+        --surface-ground: #0b1020;
+        --surface-section: #0b1020;
+        --surface-card: rgba(30, 39, 58, 0.7);
+        --surface-overlay: #121826;
+        --surface-border: rgba(148, 163, 184, 0.2);
+        --surface-hover: rgba(148, 163, 184, 0.1);
+        --text-color: #f8fafc;
+        --text-color-secondary: rgba(226, 232, 240, 0.85);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at 10% 0, #ff6ec7 0, transparent 50%),
+          radial-gradient(circle at 90% 100%, #6c5ce7 0, transparent 55%),
+          radial-gradient(circle at 0 100%, #00e5ff 0, transparent 55%), #050816;
+        color: #f8fafc;
+        overflow-x: hidden;
+      }
+
+      #app {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
+
+      .uma-shell {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        border-radius: 24px;
+        padding: 2px;
+        background: linear-gradient(
+          135deg,
+          rgba(164, 69, 255, 0.9),
+          rgba(0, 229, 255, 0.9)
+        );
+        box-shadow: 0 0 40px rgba(111, 66, 193, 0.8),
+          0 0 80px rgba(0, 229, 255, 0.4);
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+      }
+
+      .uma-shell-inner {
+        background: radial-gradient(
+            circle at top left,
+            rgba(108, 92, 231, 0.18),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(0, 229, 255, 0.18),
+            transparent 60%
+          ),
+          linear-gradient(145deg, #050816, #0b1020);
+        border-radius: inherit;
+        padding: 2.25rem 2rem 2.5rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      @media (max-width: 880px) {
+        .uma-shell-inner {
+          padding: 2rem 1.5rem 2.25rem;
+        }
+      }
+
+      .uma-bg-orbit {
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(
+            circle at 10% 20%,
+            rgba(253, 121, 168, 0.12),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(0, 229, 255, 0.1),
+            transparent 55%
+          );
+        mix-blend-mode: screen;
+        opacity: 0.9;
+        pointer-events: none;
+        filter: blur(2px);
+      }
+
+      .uma-header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1.75rem;
+      }
+
+      .uma-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .uma-logo-orb {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: radial-gradient(
+          circle at 30% 30%,
+          #ffffff,
+          #ffe3ff 30%,
+          #ff6ec7 55%,
+          #6c5ce7 80%
+        );
+        box-shadow: 0 0 16px rgba(255, 110, 199, 0.9),
+          0 0 32px rgba(108, 92, 231, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0b1020;
+        font-size: 1.1rem;
+        font-weight: 900;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        animation: uma-orb-spin 7s linear infinite;
+      }
+
+      .uma-logo-orb span {
+        transform: translateY(1px);
+      }
+
+      .uma-title {
+        font-size: 1.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: #f8fafc;
+        text-shadow: 0 0 10px rgba(108, 92, 231, 0.9),
+          0 0 24px rgba(253, 121, 168, 0.9);
+      }
+
+      .uma-subtitle {
+        font-size: 0.9rem;
+        color: rgba(226, 232, 240, 0.85);
+      }
+
+      .uma-glow-divider {
+        margin-top: 0.85rem;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(129, 140, 248, 0.9),
+          rgba(56, 189, 248, 0.9),
+          transparent
+        );
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.9));
+      }
+
+      .uma-tabs {
+        position: relative;
+        display: inline-flex;
+        padding: 0.2rem;
+        border-radius: 9999px;
+        background: radial-gradient(
+            circle at 10% 0,
+            rgba(96, 165, 250, 0.5),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 90% 100%,
+            rgba(248, 113, 113, 0.5),
+            transparent 55%
+          ),
+          rgba(15, 23, 42, 0.85);
+        box-shadow: 0 0 12px rgba(15, 23, 42, 0.9);
+        margin-bottom: 1.75rem;
+      }
+
+      .uma-tab-btn {
+        position: relative;
+        flex: 1 1 0;
+        border: none;
+        border-radius: 9999px;
+        padding: 0.55rem 1.75rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        background: transparent;
+        color: rgba(226, 232, 240, 0.75);
+        cursor: pointer;
+        transition: color 0.18s ease, transform 0.16s ease;
+      }
+
+      .uma-tab-btn span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .uma-tab-btn i {
+        font-size: 0.95rem;
+      }
+
+      .uma-tab-btn.uma-tab-active {
+        color: #ffffff; /* Changed from #0b1020 to white */
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.8); /* Stronger text shadow */
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.1); /* Subtle white background */
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Subtle glow */
+      }
+
+      .uma-tab-highlight {
+        position: absolute;
+        inset: 2px;
+        border-radius: 9999px;
+        background: radial-gradient(circle at 0 0, #a855f7, transparent 50%),
+          /* Reduced transparent percentage */
+            radial-gradient(circle at 100% 100%, #22d3ee, transparent 50%); /* Reduced transparent percentage */
+        z-index: -1;
+        transform-origin: left;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+          translate 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0.9; /* Make highlight slightly more opaque */
+      }
+
+      .uma-tab-highlight.login {
+        transform: scaleX(0.5);
+        translate: 0 0;
+      }
+
+      .uma-tab-highlight.register {
+        transform: scaleX(0.5);
+        translate: 100% 0;
+      }
+
+      .uma-form-card {
+        position: relative;
+        z-index: 1;
+      }
+
+      .uma-form-grid {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .uma-field-label {
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(148, 163, 184, 0.95);
+        margin-bottom: 0.35rem;
+      }
+
+      .uma-helper-text {
+        font-size: 0.7rem;
+        color: rgba(148, 163, 184, 0.9);
+        margin-top: 0.25rem;
+      }
+
+      .uma-actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 0.75rem;
+      }
+
+      .p-dialog .p-dialog-header {
+        background: var(--surface-overlay);
+        color: var(--text-color);
+      }
+      .p-dialog .p-dialog-content {
+        background: var(--surface-section);
+      }
+
+      .uma-stats-table {
+        border: 1px solid var(--surface-border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .uma-stats-row {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--surface-border);
+      }
+      .uma-stats-row:last-child {
+        border-bottom: none;
+      }
+      .uma-stats-row label {
+        margin-bottom: 0;
+      }
+
+      @keyframes uma-orb-spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <p-toast></p-toast>
+      <p-confirmdialog></p-confirmdialog>
+      <div class="uma-shell">
+        <div class="uma-shell-inner">
+          <div class="uma-bg-orbit"></div>
+
+          <login-register-form
+            v-if="!loggedIn"
+            @login-success="handleLogin"
+          ></login-register-form>
+
+          <uma-catalog
+            v-else
+            :current-user="currentUser"
+            @logout="handleLogout"
+          ></uma-catalog>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <script type="text/x-template" id="login-register-form-template">
+      <div class="uma-main">
+        <header class="uma-header">
+          <div class="uma-title-row">
+            <div class="uma-logo-orb">
+              <span>UM</span>
+            </div>
+            <div>
+              <h1 class="uma-title">Uma Musume Network</h1>
+              <p class="uma-subtitle">Lobby de invocadores y trainer hub</p>
+            </div>
+          </div>
+          <div class="uma-glow-divider"></div>
+        </header>
+
+        <div class="uma-tabs">
+          <div
+            class="uma-tab-highlight"
+            :class="activeTab === 'login' ? 'login' : 'register'"
+          ></div>
+          <button
+            type="button"
+            class="uma-tab-btn"
+            :class="{ 'uma-tab-active': activeTab === 'login' }"
+            @click="switchTab('login')"
+          >
+            <span><i class="pi pi-sign-in"></i> Login</span>
+          </button>
+          <button
+            type="button"
+            class="uma-tab-btn"
+            :class="{ 'uma-tab-active': activeTab === 'register' }"
+            @click="switchTab('register')"
+          >
+            <span><i class="pi pi-user-plus"></i> Registro</span>
+          </button>
+        </div>
+
+        <section class="uma-form-card">
+          <div class="uma-form-grid">
+            <!-- TAB LOGIN -->
+            <form
+              v-if="activeTab === 'login'"
+              @submit.prevent="login"
+              class="p-fluid"
+            >
+              <div class="uma-field">
+                <label class="uma-field-label" for="login-username"
+                  >Trainer ID</label
+                >
+                <p-inputtext
+                  id="login-username"
+                  v-model="loginForm.username"
+                  placeholder="Ingresa tu nickname"
+                  class="w-full"
+                />
+              </div>
+
+              <div class="uma-field" style="margin-top: 0.75rem">
+                <label class="uma-field-label" for="login-password"
+                  >Clave de acceso</label
+                >
+                <p-password
+                  id="login-password"
+                  v-model="loginForm.password"
+                  :feedback="false"
+                  toggle-mask
+                  class="w-full"
+                  input-class="w-full"
+                />
+                <p class="uma-helper-text">
+                  Protege tu establo, evita usar contraseñas obvias.
+                </p>
+              </div>
+
+              <div class="uma-actions-row">
+                <p-button
+                  type="submit"
+                  label="Entrar al lobby"
+                  icon="pi pi-play"
+                  class="p-button-rounded"
+                ></p-button>
+              </div>
+            </form>
+
+            <!-- TAB REGISTRO -->
+            <form v-else @submit.prevent="register" class="p-fluid">
+              <div class="uma-field">
+                <label class="uma-field-label" for="register-username"
+                  >Nuevo Trainer ID</label
+                >
+                <p-inputtext
+                  id="register-username"
+                  v-model="registerForm.username"
+                  placeholder="Elige tu nombre legendario"
+                  class="w-full"
+                />
+              </div>
+
+              <div class="uma-field" style="margin-top: 0.75rem">
+                <label class="uma-field-label" for="register-password"
+                  >Clave maestra</label
+                >
+                                    <p-password
+                                      id="register-password"
+                                      v-model="registerForm.password"
+                                      :feedback="true"
+                                      toggle-mask
+                                      class="w-full"
+                                      input-class="w-full"
+                                    />
+                                    <p class="uma-helper-text">
+                                      Usa una combinación épica de letras, números y símbolos.
+                                    </p>
+                                  </div>
+                
+                                  <div class="uma-field" style="margin-top: 0.75rem">
+                                    <label class="uma-field-label" for="register-confirm-password"
+                                      >Confirmar Clave</label
+                                    >
+                                    <p-password
+                                      id="register-confirm-password"
+                                      v-model="registerForm.confirmPassword"
+                                      :feedback="false"
+                                      toggle-mask
+                                      class="w-full"
+                                      input-class="w-full"
+                                    />
+                                  </div>
+              <div class="uma-actions-row">
+                <p-button
+                  type="submit"
+                  label="Crear cuenta"
+                  icon="pi pi-bolt"
+                  class="p-button-rounded"
+                  severity="secondary"
+                ></p-button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </script>
+
+    <script type="text/x-template" id="uma-catalog-template">
+      <div class="w-full">
+        <header class="uma-header flex align-items-center justify-content-between">
+          <div>
+            <h1 class="uma-title" style="font-size: 1.5rem">Catálogo de Umas</h1>
+            <p class="uma-subtitle">Bienvenido, {{ currentUser }}</p>
+          </div>
+          <div class="flex gap-2">
+            <p-button
+              type="button"
+              label="Añadir Uma"
+              icon="pi pi-plus"
+              class="p-button-rounded"
+              @click="showAddDialog = true"
+            ></p-button>
+            <p-button
+              type="button"
+              label="Salir"
+              icon="pi pi-sign-out"
+              class="p-button-rounded p-button-outlined"
+              @click="$emit('logout')"
+            ></p-button>
+          </div>
+        </header>
+
+        <!-- Filter Toolbar -->
+        <p-toolbar class="mb-4" style="background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 12px;">
+            <template #start>
+                <div class="flex align-items-center gap-4">
+                    <span class="font-semibold">Rareza:</span>
+                    <div v-for="rarity of rarityOptions" :key="rarity" class="flex align-items-center">
+                        <p-checkbox v-model="selectedRarities" :inputId="rarity" name="rarity" :value="rarity" />
+                        <label :for="rarity" class="ml-2">{{ rarity }}</label>
+                    </div>
+                </div>
+            </template>
+            <template #end>
+                <div class="p-inputgroup">
+                    <span class="p-inputgroup-addon">
+                        <i class="pi pi-search"></i>
+                    </span>
+                    <p-inputtext v-model="searchQuery" placeholder="Buscar por nombre..." />
+                </div>
+            </template>
+        </p-toolbar>
+
+        <!-- Stats Filters -->
+        <div class="grid formgrid mb-4 p-4" style="background: var(--surface-card); border: 1px solid var(--surface-border); border-radius: 12px; row-gap: 1.5rem;">
+            <div v-for="(range, stat) in statsRange" :key="stat" class="col-12 md:col-6">
+                <label :for="stat + '-slider'" class="block mb-2 capitalize">{{ stat }} ({{ range[0] }} - {{ range[1] }})</label>
+                <p-slider :id="stat + '-slider'" v-model="statsRange[stat]" range :min="1" :max="1200" />
+            </div>
+        </div>
+
+        <div v-if="loading" class="text-center p-4">
+          <p-progressspinner></p-progressspinner>
+          <p>Cargando Umas...</p>
+        </div>
+
+        <div v-else-if="!filteredUmas.length" class="text-center p-4">
+            <i class="pi pi-database" style="font-size: 2rem"></i>
+            <p class="mt-2">No se encontraron Umas con los filtros actuales.</p>
+        </div>
+
+        <div v-else class="grid" style="gap: 1.5rem">
+            <uma-card v-for="uma in filteredUmas" :key="uma.id" :uma="uma" @delete-request="handleDeleteRequest" @edit-request="handleEditRequest" class="col-12 md:col-6 lg:col-4"></uma-card>
+        </div>
+
+        <p-dialog :header="dialogTitle" :visible="showAddDialog" @update:visible="onDialogClose" modal :style="{ width: 'clamp(500px, 70vw, 800px)' }">
+            <add-uma-form :uma-data="umaToEdit" @uma-added="onUmaSaved"></add-uma-form>
+        </p-dialog>
+      </div>
+    </script>
+
+    <script type="text/x-template" id="uma-card-template">
+      <div class="p-card" style="background: var(--surface-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--surface-border);">
+          <div class="p-card-header" style="overflow: hidden;">
+              <img :src="imageUrl" alt="Uma image" style="width: 100%; height: 180px; object-fit: cover;">
+          </div>
+          <div class="p-card-body p-4">
+              <div class="p-card-title text-xl font-bold mb-2">{{ uma.name }}</div>
+              <div class="p-card-subtitle mb-3 text-sm" style="color: var(--uma-primary-light)">Rarity: {{ uma.rarity }}</div>
+              <div class="p-card-content">
+                  <p class="text-sm text-color-secondary">{{ uma.description }}</p>
+                  <div class="grid text-center mt-3 text-xs">
+                      <div class="col">SPD<br>{{ uma.speed }}</div>
+                      <div class="col">STA<br>{{ uma.stamina }}</div>
+                      <div class="col">POW<br>{{ uma.power }}</div>
+                      <div class="col">GUTS<br>{{ uma.guts }}</div>
+                      <div class="col">INT<br>{{ uma.intelligence }}</div>
+                  </div>
+              </div>
+          </div>
+          <div class="p-card-footer p-4 flex justify-content-end gap-2" style="border-top: 1px solid var(--surface-border)">
+              <p-button @click="$emit('edit-request', uma)" icon="pi pi-pencil" class="p-button-text p-button-rounded"></p-button>
+              <p-button @click="$emit('delete-request', uma.id)" icon="pi pi-trash" class="p-button-danger p-button-text p-button-rounded"></p-button>
+          </div>
+      </div>
+    </script>
+
+    <script type="text/x-template" id="add-uma-form-template">
+      <form @submit.prevent class="p-fluid" style="padding-top: 1rem;">
+
+        <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+        <h3 class="mb-4 font-semibold">Información Básica</h3>
+        <div class="grid formgrid p-fluid" style="row-gap: 1.5rem;">
+            <div class="field col-12 flex flex-column">
+                <label for="name">Nombre</label>
+                <p-inputtext id="name" v-model="form.name" required></p-inputtext>
+            </div>
+            <div class="field col-12 flex flex-column">
+                <label for="rarity">Rareza</label>
+                <p-dropdown id="rarity" v-model="form.rarity" :options="rarityOptions" placeholder=""></p-dropdown>
+            </div>
+            <div class="field col-12 flex flex-column">
+                <label for="description">Descripción</label>
+                <p-textarea id="description" v-model="form.description" rows="4" auto-resize></p-textarea>
+            </div>
+        </div>
+
+        <div class="uma-glow-divider my-5"></div>
+
+        <!-- SECCIÓN 2: ESTADÍSTICAS -->
+        <h3 class="mb-4 font-semibold">Estadísticas de Carrera</h3>
+        <div class="flex justify-content-center">
+            <div class="uma-stats-table" style="width: 100%; max-width: 500px;">
+                <div class="uma-stats-row grid grid-nogutter align-items-center">
+                    <div class="col-4 text-right pr-3">
+                        <label for="speed" class="font-semibold">Speed</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-forward"></i></span>
+                            <p-inputnumber id="speed" v-model="form.speed" mode="decimal" :min="1" :max="1200" @blur="clampStat('speed')"></p-inputnumber>
+                        </div>
+                    </div>
+                </div>
+                <div class="uma-stats-row grid grid-nogutter align-items-center">
+                    <div class="col-4 text-right pr-3">
+                        <label for="stamina" class="font-semibold">Stamina</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon"><i class="pi pi-heart-fill" style="color: var(--uma-error)"></i></span>
+                            <p-inputnumber id="stamina" v-model="form.stamina" mode="decimal" :min="1" :max="1200" @blur="clampStat('stamina')"></p-inputnumber>
+                        </div>
+                    </div>
+                </div>
+                <div class="uma-stats-row grid grid-nogutter align-items-center">
+                    <div class="col-4 text-right pr-3">
+                        <label for="power" class="font-semibold">Power</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon" style="color: var(--uma-primary-light)"><i class="pi pi-bolt"></i></span>
+                            <p-inputnumber id="power" v-model="form.power" mode="decimal" :min="1" :max="1200" @blur="clampStat('power')"></p-inputnumber>
+                        </div>
+                    </div>
+                </div>
+                <div class="uma-stats-row grid grid-nogutter align-items-center">
+                    <div class="col-4 text-right pr-3">
+                        <label for="guts" class="font-semibold">Guts</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon" style="color: var(--uma-accent)"><i class="pi pi-shield"></i></span>
+                            <p-inputnumber id="guts" v-model="form.guts" mode="decimal" :min="1" :max="1200" @blur="clampStat('guts')"></p-inputnumber>
+                        </div>
+                    </div>
+                </div>
+                <div class="uma-stats-row grid grid-nogutter align-items-center">
+                    <div class="col-4 text-right pr-3">
+                        <label for="intelligence" class="font-semibold">Intelligence</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon" style="color: var(--uma-success)"><i class="pi pi-book"></i></span>
+                            <p-inputnumber id="intelligence" v-model="form.intelligence" mode="decimal" :min="1" :max="1200" @blur="clampStat('intelligence')"></p-inputnumber>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uma-glow-divider my-5"></div>
+
+        <!-- SECCIÓN 3: IMAGEN -->
+        <h3 class="mb-4 font-semibold">Imagen de Perfil</h3>
+        <div class="field">
+            <p-fileupload id="image" name="image" @select="onFileSelect" :show-upload-button="false" :show-cancel-button="false" accept="image/*" customUpload>
+                <template #empty>
+                    <div class="text-center p-4" style="border: 2px dashed var(--surface-border); border-radius: 12px; cursor: pointer;">
+                        <i class="pi pi-image" style="font-size: 2rem"></i>
+                        <p class="mt-2">Arrastra y suelta la imagen aquí o haz clic para seleccionar.</p>
+                    </div>
+                </template>
+            </p-fileupload>
+        </div>
+
+        <!-- BOTÓN -->
+        <div class="flex justify-content-end mt-5">
+            <p-button @click="handleSubmit" label="Guardar Uma" icon="pi pi-check" :loading="submitting"></p-button>
+        </div>
+      </form>
+    </script>
+    <!-- Vue 3 local -->
+    <script src="./node_modules/vue/dist/vue.global.js"></script>
+    <!-- PrimeVue UMD core (desde node_modules) -->
+    <script src="./node_modules/primevue/umd/primevue.min.js"></script>
+    <!-- Tema Aura de PrimeVue (inyecta estilos dinámicos) -->
+    <script src="./node_modules/@primevue/themes/umd/aura.min.js"></script>
+
+    <!-- API Helpers -->
+    <script src="./config.js"></script>
+    <script src="./api/index.js"></script>
+    <script src="./api/umas.js"></script>
+
+    <!-- Componentes -->
+    <script src="./components/LoginRegister.js"></script>
+    <script src="./components/UmaCatalog.js"></script>
+    <script src="./components/UmaCard.js"></script>
+    <script src="./components/AddUmaForm.js"></script>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

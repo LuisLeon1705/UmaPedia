@@ -1,0 +1,32 @@
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile.db
+    container_name: uma_musume_db
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: uma_musume_backend
+    env_file: ./backend/.env
+    environment:
+      # Override DB_HOST from .env so the backend connects to the db service in Docker
+      DB_HOST: db
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: uma_musume_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
