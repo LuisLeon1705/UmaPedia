@@ -75,6 +75,8 @@ if (PrimeVue) {
   app.component("p-checkbox", PrimeVue.Checkbox);
   app.component("p-slider", PrimeVue.Slider);
   app.component("p-toolbar", PrimeVue.Toolbar);
+  app.component("p-accordion", PrimeVue.Accordion);
+  app.component("p-accordiontab", PrimeVue.AccordionTab);
 }
 
 // Mis componentes
